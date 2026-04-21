@@ -10,12 +10,12 @@ const graph = {
 }
 
 const nodePositions = {
-  A: { x: 180, y: 54 },
-  B: { x: 100, y: 136 },
-  C: { x: 260, y: 136 },
-  D: { x: 68, y: 230 },
-  E: { x: 180, y: 230 },
-  F: { x: 292, y: 230 },
+  A: { x: 50, y: 18 },
+  B: { x: 30, y: 46 },
+  C: { x: 70, y: 46 },
+  D: { x: 22, y: 78 },
+  E: { x: 50, y: 78 },
+  F: { x: 78, y: 78 },
 }
 
 function GraphPage() {
@@ -109,46 +109,55 @@ function GraphPage() {
       <div className="graph-layout">
         <article className="feature-card graph-canvas-card">
           <h2>Graph View</h2>
-          <div className="graph-canvas">
-            <svg viewBox="0 0 320 300" className="graph-svg" aria-hidden="true">
+          <div className="graph-container">
+            <svg className="graph-svg" aria-label="BFS graph visualization" role="img">
               {Object.entries(graph).flatMap(([from, neighbors]) =>
                 neighbors.map((to) => (
                   <line
                     key={`${from}-${to}`}
-                    x1={nodePositions[from].x}
-                    y1={nodePositions[from].y}
-                    x2={nodePositions[to].x}
-                    y2={nodePositions[to].y}
+                    x1={`${nodePositions[from].x}%`}
+                    y1={`${nodePositions[from].y}%`}
+                    x2={`${nodePositions[to].x}%`}
+                    y2={`${nodePositions[to].y}%`}
                     className="graph-edge"
                   />
                 )),
               )}
+              {nodes.map((node) => {
+                const isActive = current?.active === node
+                const isVisited = current?.visited?.includes(node)
+                return (
+                  <g key={node} className="graph-node-group">
+                    <circle
+                      className={`graph-node ${isVisited ? 'visited' : 'unvisited'} ${isActive ? 'active' : ''}`}
+                      cx={`${nodePositions[node].x}%`}
+                      cy={`${nodePositions[node].y}%`}
+                      r="20"
+                    />
+                    <text
+                      className="graph-node-label"
+                      x={`${nodePositions[node].x}%`}
+                      y={`${nodePositions[node].y}%`}
+                    >
+                      {node}
+                    </text>
+                  </g>
+                )
+              })}
             </svg>
-
-            {nodes.map((node) => {
-              const isActive = current?.active === node
-              const isVisited = current?.visited?.includes(node)
-              return (
-                <div
-                  key={node}
-                  className={`graph-node ${isVisited ? 'visited' : 'unvisited'} ${isActive ? 'active' : ''}`}
-                  style={{ left: `${nodePositions[node].x}px`, top: `${nodePositions[node].y}px` }}
-                >
-                  {node}
-                </div>
-              )
-            })}
           </div>
         </article>
 
-        <div className="graph-info-grid">
-          <article className="feature-card">
-            <h2>Step</h2>
-            <p>{steps.length === 0 ? 'No traversal generated yet.' : `${cursor + 1} / ${steps.length}`}</p>
+        <div className="stats-grid">
+          <article className="stat-card">
+            <h2 className="stat-title">Step</h2>
+            <p className="stat-value">
+              {steps.length === 0 ? 'No traversal generated yet.' : `${cursor + 1} / ${steps.length}`}
+            </p>
           </article>
-          <article className="feature-card">
-            <h2>Queue State</h2>
-            <div className="queue-visual" aria-label="Queue order">
+          <article className="stat-card">
+            <h2 className="stat-title">Queue State</h2>
+            <div className="queue-visual stat-value" aria-label="Queue order">
               {current?.queue?.length ? (
                 current.queue.map((node, index) => (
                   <div key={`${node}-${index}`} className="queue-item">
@@ -160,9 +169,9 @@ function GraphPage() {
               )}
             </div>
           </article>
-          <article className="feature-card">
-            <h2>Traversal Order</h2>
-            <p>{current?.traversal?.join(' -> ') || '-'}</p>
+          <article className="stat-card">
+            <h2 className="stat-title">Traversal Order</h2>
+            <p className="stat-value traversal-text">{current?.traversal?.join(' -> ') || '-'}</p>
           </article>
         </div>
       </div>
