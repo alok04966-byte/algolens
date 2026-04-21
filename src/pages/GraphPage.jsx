@@ -72,83 +72,85 @@ function GraphPage() {
     <section className="panel-card">
       <h1>Graph Visualizer (BFS)</h1>
       <p>Explore how breadth-first search expands level by level from a selected start node.</p>
-      <div className="graph-controls">
-        <label htmlFor="start-node-select">Start Node</label>
-        <select
-          id="start-node-select"
-          value={startNode}
-          onChange={(event) => setStartNode(event.target.value)}
-        >
-          {nodes.map((node) => (
-            <option key={node} value={node}>
-              {node}
-            </option>
-          ))}
-        </select>
-        <button type="button" className="control-button control-button-primary" onClick={generateBfsSteps}>
-          Generate Traversal
-        </button>
-        <button
-          type="button"
-          className="control-button control-button-secondary"
-          onClick={() => setCursor((prev) => Math.max(0, prev - 1))}
-          disabled={cursor === 0 || steps.length === 0}
-        >
-          Previous
-        </button>
-        <button
-          type="button"
-          className="control-button control-button-secondary"
-          onClick={() => setCursor((prev) => Math.min(steps.length - 1, prev + 1))}
-          disabled={steps.length === 0 || cursor >= steps.length - 1}
-        >
-          Next
-        </button>
-      </div>
 
-      <div className="graph-layout">
-        <article className="feature-card graph-canvas-card">
-          <h2>Graph View</h2>
-          <div className="graph-container">
-            <svg className="graph-svg" aria-label="BFS graph visualization" role="img">
-              {Object.entries(graph).flatMap(([from, neighbors]) =>
-                neighbors.map((to) => (
-                  <line
-                    key={`${from}-${to}`}
-                    x1={`${nodePositions[from].x}%`}
-                    y1={`${nodePositions[from].y}%`}
-                    x2={`${nodePositions[to].x}%`}
-                    y2={`${nodePositions[to].y}%`}
-                    className="graph-edge"
-                  />
-                )),
-              )}
-              {nodes.map((node) => {
-                const isActive = current?.active === node
-                const isVisited = current?.visited?.includes(node)
-                return (
-                  <g key={node} className="graph-node-group">
-                    <circle
-                      className={`graph-node ${isVisited ? 'visited' : 'unvisited'} ${isActive ? 'active' : ''}`}
-                      cx={`${nodePositions[node].x}%`}
-                      cy={`${nodePositions[node].y}%`}
-                      r="20"
+      <div className="graph-page">
+        <div className="graph-left">
+          <article className="feature-card graph-canvas-card">
+            <h2>Graph View</h2>
+            <div className="graph-container">
+              <svg className="graph-svg" aria-label="BFS graph visualization" role="img">
+                {Object.entries(graph).flatMap(([from, neighbors]) =>
+                  neighbors.map((to) => (
+                    <line
+                      key={`${from}-${to}`}
+                      x1={`${nodePositions[from].x}%`}
+                      y1={`${nodePositions[from].y}%`}
+                      x2={`${nodePositions[to].x}%`}
+                      y2={`${nodePositions[to].y}%`}
+                      className="graph-edge"
                     />
-                    <text
-                      className="graph-node-label"
-                      x={`${nodePositions[node].x}%`}
-                      y={`${nodePositions[node].y}%`}
-                    >
-                      {node}
-                    </text>
-                  </g>
-                )
-              })}
-            </svg>
-          </div>
-        </article>
+                  )),
+                )}
+                {nodes.map((node) => {
+                  const isActive = current?.active === node
+                  const isVisited = current?.visited?.includes(node)
+                  return (
+                    <g key={node} className="graph-node-group">
+                      <circle
+                        className={`graph-node ${isVisited ? 'visited' : 'unvisited'} ${isActive ? 'active' : ''}`}
+                        cx={`${nodePositions[node].x}%`}
+                        cy={`${nodePositions[node].y}%`}
+                        r="20"
+                      />
+                      <text
+                        className="graph-node-label"
+                        x={`${nodePositions[node].x}%`}
+                        y={`${nodePositions[node].y}%`}
+                      >
+                        {node}
+                      </text>
+                    </g>
+                  )
+                })}
+              </svg>
+            </div>
+          </article>
+        </div>
 
-        <div className="stats-grid">
+        <div className="graph-right">
+          <div className="graph-controls">
+            <label htmlFor="start-node-select">Start Node</label>
+            <select
+              id="start-node-select"
+              value={startNode}
+              onChange={(event) => setStartNode(event.target.value)}
+            >
+              {nodes.map((node) => (
+                <option key={node} value={node}>
+                  {node}
+                </option>
+              ))}
+            </select>
+            <button type="button" className="control-button control-button-primary" onClick={generateBfsSteps}>
+              Generate Traversal
+            </button>
+            <button
+              type="button"
+              className="control-button control-button-secondary"
+              onClick={() => setCursor((prev) => Math.max(0, prev - 1))}
+              disabled={cursor === 0 || steps.length === 0}
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              className="control-button control-button-secondary"
+              onClick={() => setCursor((prev) => Math.min(steps.length - 1, prev + 1))}
+              disabled={steps.length === 0 || cursor >= steps.length - 1}
+            >
+              Next
+            </button>
+          </div>
           <article className="stat-card">
             <h2 className="stat-title">Step</h2>
             <p className="stat-value">
@@ -173,36 +175,34 @@ function GraphPage() {
             <h2 className="stat-title">Traversal Order</h2>
             <p className="stat-value traversal-text">{current?.traversal?.join(' -> ') || '-'}</p>
           </article>
-        </div>
-      </div>
 
-      <section className="explanation-panel" aria-live="polite">
-        <h2 className="explanation-title">What is happening?</h2>
-        <p className="explanation-text">
-          {current?.explanation || 'Generate traversal and move step by step to inspect BFS decisions.'}
-        </p>
-      </section>
-      {current?.addedNeighbors?.length > 0 && (
-        <p className="hint-text">Neighbors enqueued this step: {current.addedNeighbors.join(', ')}</p>
-      )}
-      {steps.length > 0 && (
-        <div className="status-row">
-          <p className="algorithm-label">Active Node: {current?.active}</p>
-          <p className="step-counter">Visited: {current?.visited?.join(', ')}</p>
+          <section className="explanation-box" aria-live="polite">
+            <h2 className="explanation-title">What is happening?</h2>
+            <p className="explanation-text">
+              {current?.explanation || 'Generate traversal and move step by step to inspect BFS decisions.'}
+            </p>
+          </section>
+          {current?.addedNeighbors?.length > 0 && (
+            <p className="hint-text">Neighbors enqueued this step: {current.addedNeighbors.join(', ')}</p>
+          )}
+          {steps.length > 0 && (
+            <div className="status-row graph-status-row">
+              <p className="algorithm-label">Active Node: {current?.active}</p>
+              <p className="step-counter">Visited: {current?.visited?.join(', ')}</p>
+            </div>
+          )}
+          <button
+            type="button"
+            className="control-button control-button-secondary reset-btn"
+            onClick={() => {
+              setSteps([])
+              setCursor(0)
+            }}
+            disabled={steps.length === 0}
+          >
+            Reset Traversal
+          </button>
         </div>
-      )}
-      <div className="buttons-row">
-        <button
-          type="button"
-          className="control-button control-button-secondary"
-          onClick={() => {
-            setSteps([])
-            setCursor(0)
-          }}
-          disabled={steps.length === 0}
-        >
-          Reset Traversal
-        </button>
       </div>
     </section>
   )
