@@ -5,6 +5,8 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth'
+import Loader from '../components/Loader'
+import { useMinimumLoaderDelay } from '../hooks/useMinimumLoaderDelay'
 import { auth, isFirebaseConfigured } from '../services/firebase'
 import { getUserProfile, upsertUserProfile } from '../services/profileService'
 import { AuthContext } from './auth-context'
@@ -19,6 +21,7 @@ const getStoredMockUser = () => {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => (!isFirebaseConfigured ? getStoredMockUser() : null))
   const [isLoading, setIsLoading] = useState(isFirebaseConfigured)
+  const shouldShowLoader = useMinimumLoaderDelay(isLoading)
 
   useEffect(() => {
     if (!isFirebaseConfigured || !auth) return undefined
@@ -101,6 +104,10 @@ export function AuthProvider({ children }) {
     }),
     [isLoading, user],
   )
+
+  if (shouldShowLoader) {
+    return <Loader fullscreen />
+  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

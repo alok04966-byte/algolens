@@ -1,12 +1,15 @@
 import { Navigate, useLocation } from 'react-router-dom'
+import Loader from '../components/Loader'
+import { useMinimumLoaderDelay } from '../hooks/useMinimumLoaderDelay'
 import { useAuth } from '../hooks/useAuth'
 
 function ProtectedRoute({ children }) {
   const { user, isLoading } = useAuth()
   const location = useLocation()
+  const shouldShowLoader = useMinimumLoaderDelay(isLoading)
 
-  if (isLoading) {
-    return <section className="panel-card">Loading your workspace...</section>
+  if (shouldShowLoader) {
+    return <Loader />
   }
 
   if (!user) {

@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import Loader from '../components/Loader'
+import { useMinimumLoaderDelay } from '../hooks/useMinimumLoaderDelay'
 import { useAuth } from '../hooks/useAuth'
 import {
   createProgressItem,
@@ -34,6 +36,7 @@ function ProgressPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const completedCount = items.filter((item) => item.status === 'done').length
+  const shouldShowLoader = useMinimumLoaderDelay(isLoading)
 
   useEffect(() => {
     let isSubscribed = true
@@ -134,6 +137,10 @@ function ProgressPage() {
     }
   }
 
+  if (shouldShowLoader) {
+    return <Loader />
+  }
+
   return (
     <section className="panel-card">
       <h1>Progress Tracker (CRUD)</h1>
@@ -180,108 +187,102 @@ function ProgressPage() {
       {error && <p className="error-text">{error}</p>}
       <section className="section-block">
         <h2 className="section-heading">Your Learning Progress</h2>
-        {!isLoading && (
-          <p className="progress-summary">
-            {items.length} Tasks • {completedCount} Completed
-          </p>
-        )}
-        {isLoading ? (
-          <p>Loading progress...</p>
-        ) : (
-          <div className="progress-list">
-            {items.length === 0 && (
-              <article className="feature-card empty-state-card">
-                <span className="empty-state-icon" aria-hidden="true">
-                  🗂️
-                </span>
-                <h3>No learning tasks yet</h3>
-                <p>Create your first task above and start tracking interview prep consistency.</p>
-              </article>
-            )}
-            {items.map((item) => (
-              <article className="feature-card progress-item-card" key={item.id}>
-                {editState.id === item.id ? (
-                  <div className="form-grid compact-form">
-                    <label htmlFor={`edit-title-${item.id}`}>Title</label>
-                    <input
-                      id={`edit-title-${item.id}`}
-                      value={editState.title}
-                      onChange={(event) => setEditState((prev) => ({ ...prev, title: event.target.value }))}
-                    />
+        <p className="progress-summary">
+          {items.length} Tasks • {completedCount} Completed
+        </p>
+        <div className="progress-list">
+          {items.length === 0 && (
+            <article className="feature-card empty-state-card">
+              <span className="empty-state-icon" aria-hidden="true">
+                🗂️
+              </span>
+              <h3>No learning tasks yet</h3>
+              <p>Create your first task above and start tracking interview prep consistency.</p>
+            </article>
+          )}
+          {items.map((item) => (
+            <article className="feature-card progress-item-card" key={item.id}>
+              {editState.id === item.id ? (
+                <div className="form-grid compact-form">
+                  <label htmlFor={`edit-title-${item.id}`}>Title</label>
+                  <input
+                    id={`edit-title-${item.id}`}
+                    value={editState.title}
+                    onChange={(event) => setEditState((prev) => ({ ...prev, title: event.target.value }))}
+                  />
 
-                    <label htmlFor={`edit-topic-${item.id}`}>Topic</label>
-                    <input
-                      id={`edit-topic-${item.id}`}
-                      value={editState.topic}
-                      onChange={(event) => setEditState((prev) => ({ ...prev, topic: event.target.value }))}
-                    />
+                  <label htmlFor={`edit-topic-${item.id}`}>Topic</label>
+                  <input
+                    id={`edit-topic-${item.id}`}
+                    value={editState.topic}
+                    onChange={(event) => setEditState((prev) => ({ ...prev, topic: event.target.value }))}
+                  />
 
-                    <label htmlFor={`edit-status-${item.id}`}>Status</label>
+                  <label htmlFor={`edit-status-${item.id}`}>Status</label>
+                  <select
+                    id={`edit-status-${item.id}`}
+                    value={editState.status}
+                    onChange={(event) => setEditState((prev) => ({ ...prev, status: event.target.value }))}
+                  >
+                    <option value="todo">To Do</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="done">Completed</option>
+                  </select>
+
+                  <div className="buttons-row left-aligned">
+                    <button
+                      type="button"
+                      className="control-button control-button-primary"
+                      onClick={() => handleSaveEdit(item.id)}
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      className="control-button control-button-secondary"
+                      onClick={handleCancelEdit}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <h3>{item.title}</h3>
+                  <p className="task-topic">Topic: {item.topic}</p>
+                  <p className={`status-badge status-${item.status}`}>
+                    {statusLabelMap[item.status] || item.status}
+                  </p>
+                  <div className="buttons-row left-aligned">
                     <select
-                      id={`edit-status-${item.id}`}
-                      value={editState.status}
-                      onChange={(event) => setEditState((prev) => ({ ...prev, status: event.target.value }))}
+                      value={item.status}
+                      onChange={(event) => handleStatusUpdate(item.id, event.target.value)}
+                      className="status-select-inline"
                     >
                       <option value="todo">To Do</option>
                       <option value="in_progress">In Progress</option>
                       <option value="done">Completed</option>
                     </select>
-
-                    <div className="buttons-row left-aligned">
-                      <button
-                        type="button"
-                        className="control-button control-button-primary"
-                        onClick={() => handleSaveEdit(item.id)}
-                      >
-                        Save
-                      </button>
-                      <button
-                        type="button"
-                        className="control-button control-button-secondary"
-                        onClick={handleCancelEdit}
-                      >
-                        Cancel
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      className="control-button control-button-secondary"
+                      onClick={() => handleStartEdit(item)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      className="control-button control-button-secondary"
+                      onClick={() => handleDelete(item.id)}
+                    >
+                      Delete
+                    </button>
                   </div>
-                ) : (
-                  <>
-                    <h3>{item.title}</h3>
-                    <p className="task-topic">Topic: {item.topic}</p>
-                    <p className={`status-badge status-${item.status}`}>
-                      {statusLabelMap[item.status] || item.status}
-                    </p>
-                    <div className="buttons-row left-aligned">
-                      <select
-                        value={item.status}
-                        onChange={(event) => handleStatusUpdate(item.id, event.target.value)}
-                        className="status-select-inline"
-                      >
-                        <option value="todo">To Do</option>
-                        <option value="in_progress">In Progress</option>
-                        <option value="done">Completed</option>
-                      </select>
-                      <button
-                        type="button"
-                        className="control-button control-button-secondary"
-                        onClick={() => handleStartEdit(item)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        className="control-button control-button-secondary"
-                        onClick={() => handleDelete(item.id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </>
-                )}
-              </article>
-            ))}
-          </div>
-        )}
+                </>
+              )}
+            </article>
+          ))}
+        </div>
       </section>
     </section>
   )

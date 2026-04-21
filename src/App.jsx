@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import './App.css'
+import Loader from './components/Loader'
 import AppLayout from './components/layout/AppLayout'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
@@ -18,7 +19,7 @@ function App() {
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
-          <Suspense fallback={<section className="panel-card">Loading page...</section>}>
+          <Suspense fallback={<Loader fullscreen />}>
             <Routes>
               <Route element={<AppLayout />}>
                 <Route index element={<LandingPage />} />
